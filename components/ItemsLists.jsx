@@ -15,7 +15,7 @@ const ItemsLists = () => {
 
 
     const handleAddCart=(item)=>{
-      dispatch(cartItems.addToCart({item,qty:1}))
+      dispatch(cartItems.addToCart({item,qty:1,totalPrice:item.price*1}))
     }
 
   return (
@@ -48,10 +48,10 @@ const ItemsLists = () => {
             return(
                 <TouchableOpacity onPress={()=>navigation.push("selected",{
                   item:item
-                })} key={index} style={styles.itemss}>
+                })} key={index+1} style={styles.itemss}>
                 <Image source={{uri:item.image}} style={styles.productImage}/>
                 <View style={{padding:10}}>
-                    <Text style={{fontSize:23,color:"black",fontWeight:'700'}}>{item.name}</Text>
+                    <Text style={{fontSize:23,color:"black",fontWeight:'700'}}>{item.name} {item.id}</Text>
                     <Text style={{fontSize:16,color:"black",fontWeight:'400'}}>{item.category}</Text>
                     <Text style={{fontSize:18,color:"green",fontWeight:'600'}}>${item.price}</Text>
                     <Text style={{fontSize:18,color:colorScheme=='dark'?"white":"black",fontWeight:'600',alignItems:'center',color:'red'}}>{item.rating}⭐ <Text style={{fontWeight:'400'}}>{item.ratingCount} Reviews</Text></Text>

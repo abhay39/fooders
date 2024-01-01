@@ -10,26 +10,30 @@ import { useDispatch, useSelector } from 'react-redux'
 import { cartItems } from '../store/Index'
 
 
-const Carts = ({ route, navigation }) => {
+const Carts = ({  navigation }) => {
   // const item=  route.params.item
   const colorScheme = useColorScheme();
-  const [qty, setQty] = useState(1);
 
-  const item = {
-    id: 37,
-    name: 'Hot Dog',
-    image: 'https://hips.hearstapps.com/hmg-prod/images/big-mac-hotdog-7-1656099486.jpeg',
-    price: 200,
-    category: 'Hot Dog',
-    description: 'Hot Dog is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food in India. It is a popular food',
-    rating: 4.5,
-    ratingCount: 100,
-  }
+
 
   const dispatch=useDispatch();
   const itemsOnCart=useSelector((store)=>store.cart);
 
-  console.log(itemsOnCart.length);
+  const increaseItemCount=(item,qty)=>{
+    
+    dispatch(cartItems.increaseItemCount(item));
+  }
+  const decreaseItemCount=(item)=>{
+    dispatch(cartItems.decreaseItemCount(item));
+    
+  }
+
+  let totalPrice=itemsOnCart.reduce((sum,current)=>sum+current.totalPrice,0);
+
+  let delivery=4/100 * totalPrice;
+  let finalAmount=totalPrice+delivery;
+
+  // console.log(totalPrice)
 
   return (
     <View showsVerticalScrollIndicator={false} style={[styles.container, {
@@ -48,10 +52,9 @@ const Carts = ({ route, navigation }) => {
         itemsOnCart.length>0?(<>
           <ScrollView showsVerticalScrollIndicator={false}>
         {
-          itemsOnCart.length>0 && (itemsOnCart.map(({item,qty})=>{
-            console.log(item,qty)
+          itemsOnCart.length>0 && (itemsOnCart.map(({item,qty,totalPrice},index)=>{
             return(
-              <Animatable.View key={qty} duration={4000} animation="rubberBand" style={{
+              <Animatable.View key={index} duration={4000} animation="rubberBand" style={{
                 display: 'flex',
                 flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, backgroundColor: '#cce3de', padding: 10, borderRadius: 20
               }}>
@@ -60,28 +63,20 @@ const Carts = ({ route, navigation }) => {
                   <View style={{ padding: 10 }}>
                     <Text style={{ fontSize: 20, color: colorScheme === 'dark' ? "#233d4d" : "#233d4d", fontWeight: '600' }}>${item.name}</Text>
                     <Text style={{ fontSize: 16, color: colorScheme === 'dark' ? "#233d4d" : "#233d4d", fontWeight: '500' }}>({qty}pcs)</Text>
-                    <Text style={{ fontSize: 18, color: colorScheme === 'dark' ? "white" : "black", fontWeight: '500' }}>${item.price * qty}</Text>
+                    <Text style={{ fontSize: 18, color: colorScheme === 'dark' ? "black" : "black", fontWeight: '500' }}>${totalPrice}</Text>
                   </View>
                 </View>
       
                 <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', width: '38%', justifyContent: 'space-between', backgroundColor: colorScheme === 'light' ? "black" : "white", borderRadius: 20, padding: 3, }}>
                   <TouchableOpacity onPress={() => {
-                    if (qty < 0) {
-                      Toast.show({
-                        type: "error",
-                        text1: "",
-                        text2: "Qty Can't be less than 0",
-                        text2Style: {
-                          fontSize: 20,
-                          color: "red",
-                          fontWeight: "bold",
-                        }
-                      })
-                      setQty(0);
-                    } else {
-                      setQty((prev) => prev - 1);
-      
+                    
+                    if(qty>1){
+                      decreaseItemCount(item)
                     }
+                    else{
+                      Alert.alert(`${qty} cannot be  0`)
+                    }
+                    
                   }} style={{
                     backgroundColor: colorScheme === 'light' ? "white" : "black", borderRadius: 50, opacity: 0.8, alignItems: 'center', justifyContent: "center", width: 40, height: 40, opacity: 0.9
                   }}>
@@ -89,7 +84,7 @@ const Carts = ({ route, navigation }) => {
                   </TouchableOpacity>
                   <Text style={{ fontSize: 20, color: colorScheme === 'dark' ? "black" : "white", fontWeight: '600' }}>{qty}</Text>
                   <TouchableOpacity onPress={() => {
-                    setQty((prev) => prev + 1);
+                    increaseItemCount(item,qty);
                   }} style={{
                     backgroundColor: colorScheme === 'light' ? "white" : "black", borderRadius: 50, opacity: 0.8, alignItems: 'center', justifyContent: "center", width: 40, height: 40, opacity: 0.9
                   }}>
@@ -114,18 +109,18 @@ const Carts = ({ route, navigation }) => {
 
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between', marginTop: 10 }}>
           <Text style={{ fontSize: 20, color: '#a0afb8', fontWeight: '300' }}>Product Price</Text>
-          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>${item.price * qty}</Text>
+          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>${totalPrice}</Text>
         </View>
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between' }}>
           <Text style={{ fontSize: 20, color: '#a0afb8', fontWeight: '300' }}>Delivery Charge</Text>
-          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>$2.00</Text>
+          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>${delivery}</Text>
         </View>
 
         <View style={{ borderBottomWidth: 2, borderBottomColor: 'gray', marginBottom: 2 }} />
 
         <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 10, justifyContent: 'space-between' }}>
           <Text style={{ fontSize: 20, color: '#a0afb8', fontWeight: '300' }}>Total Amount</Text>
-          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>${item.price * qty + 2.6}</Text>
+          <Text style={{ fontSize: 20, color: '#000', fontWeight: '500' }}>${finalAmount}</Text>
         </View>
 
       </Animatable.View>
@@ -136,25 +131,9 @@ const Carts = ({ route, navigation }) => {
         <TouchableOpacity style={{
           backgroundColor: colorScheme === 'light' ? "black" : "white", height: 60, padding: 3, borderRadius: 20, width: '100%', alignItems: 'center', justifyContent: 'center',
         }} onPress={() => {
-          Toast.show({
-            type: "success",
-            text1: "Added to cart",
-            text2: `${qty} ${item.name} added successfully`,
-            text2Style: {
-              fontSize: 16,
-              color: "#1b263b",
-              fontWeight: "bold",
-            },
-            text1Style: {
-              fontSize: 20,
-              color: "red",
-              fontWeight: "bold",
-            }
+          navigation.push("confirm",{
+            totalPrice:finalAmount
           })
-          setTimeout(() => {
-            navigation.goBack()
-          }, 2000)
-          setQty(1);
         }}>
           <Text style={{ fontSize: 20, color: colorScheme === 'dark' ? "black" : "white", fontWeight: '500' }}>Continue Order</Text>
         </TouchableOpacity>
